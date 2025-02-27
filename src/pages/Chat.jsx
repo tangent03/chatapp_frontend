@@ -1,14 +1,24 @@
 import React, { Fragment, useRef } from 'react';
 import AppLayout from '../components/layout/AppLayout';
 import { IconButton, Stack } from '@mui/material';
-import { grayColor } from '../constants/color';
+import { grayColor,orange } from '../constants/color';
 import { AttachFile as AttachFileIcon, Send as SendIcon} from '@mui/icons-material';
 import { InputBox } from '../components/styles/StyledComponents';
+import FileMenu from '../components/dialogs/FileMenu';
+import { sampleMessage } from '../constants/sampleData';
+import MessageComponent from '../components/shared/MessageComponent';
+
+
+const user = {
+  _id:"sdfsdfsdf",
+  name:"Aman Dixit"
+}
 
 const Chat = () => {
 
-  const containerRef = useRef(null);
 
+  const containerRef = useRef(null);
+  
 
   return (
     <Fragment>
@@ -35,7 +45,13 @@ const Chat = () => {
         }
       }}
       >
+{
+  sampleMessage.map((i) => (
+    <MessageComponent key={i._id} message={i} user={user}/>
+  )
 
+  )
+}
 
       </Stack>
 
@@ -44,16 +60,37 @@ const Chat = () => {
       }}
       >
 
-      <Stack>
-        <IconButton>
+      <Stack 
+      direction={"row"} 
+      height={"100%"}
+      padding={"1rem"}
+      alignItems={"center"}
+      position={"relative"}
+
+      >
+        <IconButton sx={{
+          position:"absolute",
+          left: "1.5rem",
+        }}
+        
+        >
           <AttachFileIcon/>
         </IconButton>
 
 
-        <InputBox placeholder="Type a message..."/>
+        <InputBox placeholder="Type a message"/>
 
 
-        <IconButton>
+        <IconButton type='submit' sx={{
+          bgcolor:orange,
+          color:"white",
+          marginLeft:"1rem",
+          fontSize: "1.2rem",
+          padding: "0.5rem",
+          "&hover":{
+            bgColor:"error.dark",
+          }
+        }}>
           <SendIcon/>
         </IconButton>
 
@@ -62,6 +99,8 @@ const Chat = () => {
 
 
       </form>
+
+      <FileMenu />
     </Fragment>
     
   )

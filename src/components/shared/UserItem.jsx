@@ -1,7 +1,7 @@
 import { Avatar, IconButton, ListItem, ListItemText, Stack, Typography } from '@mui/material'
 import React, { memo } from 'react'
 import {Add as AddIcon , Remove as RemoveIcon} from "@mui/icons-material"
-const UserItem = ({user,handler,handlerIsLoading,isAdded=false}) => {
+const UserItem = ({user,handler,handlerIsLoading,isAdded=false,styling={},}) => {
 
     const {name,_id,avatar} = user
 
@@ -15,7 +15,8 @@ const UserItem = ({user,handler,handlerIsLoading,isAdded=false}) => {
                 alignItems={"center"}
                 justifyContent={"space-between"}
                 spacing={"2rem"}
-                width={"100%"}>
+                width={"100%"}
+                {...styling}>
                 <Avatar/>
                 <Typography
                     variant="body1"

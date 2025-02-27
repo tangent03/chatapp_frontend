@@ -5,11 +5,13 @@ import ProtectRoute from './components/auth/ProtectRoute';
 import { LayoutLoader } from './components/layout/Loaders';
 import AppLayout from './components/layout/AppLayout'; // Import AppLayout
 
+
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Chat = lazy(() => import('./pages/Chat')); // Import Chat directly
 const Groups = lazy(() => import('./pages/Groups'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 
 let user = true;
 
@@ -37,6 +39,8 @@ const App = () => {
             }
           />
 
+
+          <Route path='/admin' element={<AdminLogin/>}/>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

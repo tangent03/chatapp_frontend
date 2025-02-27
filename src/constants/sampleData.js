@@ -17,6 +17,182 @@ export const sampleChats = [
     members:["1","2"],
 
 },
+{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},{
+    avatar:["https://i.pravatar.cc/300"],
+    name:"John Poe",
+    _id:"3",
+    groupChat:false,    
+    members:["1","2"],
+
+},
 
 
 
@@ -56,3 +232,38 @@ export const sampleNotifications = [
 
 ]
 
+export const sampleMessage = [
+    {
+        attachments:[
+            {
+                public_id:"asdsad",
+                url:"https://www.w3schools.com/howto/img_avatar.png",
+            }
+        ],
+        content:"LOUDE ka message hai",
+        _id:"jainwin",
+        sender:{
+            _id:"user._id",
+            name:"Chaman",
+        },
+        chat:"chatId",
+        createdAt:"2024-02-12T10:41:30.630Z"
+    },
+    {
+        attachments:[
+            {
+                public_id:"asdsad2",
+                url:"https://www.w3schools.com/howto/img_avatar.png",
+            }
+        ],
+        content:"LOUDE  2 ka message hai",
+        _id:"jainwin2",
+        sender:{
+            _id:"sdfsdfsdf",
+            name:"Chaman2",
+        },
+        chat:"chatId",
+        createdAt:"2024-02-12T10:41:30.630Z"
+    }
+
+]
