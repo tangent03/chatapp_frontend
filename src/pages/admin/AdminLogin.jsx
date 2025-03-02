@@ -2,159 +2,93 @@ import { Avatar, Button, Container, IconButton, Paper, Stack, TextField, Typogra
 import React, { useState } from 'react';
 import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
 import { bgGradient } from '../../constants/color';
+import { useInputValidation } from '6pp';
+import { Navigate } from 'react-router-dom';
+
+
+const isAdmin = true;
+
+
 const AdminLogin = () => {
+
+
+    const secretKey = useInputValidation("");
+
+
+    const submitHandler = (e) => {
+        e.preventDefault();
+        console.log(email, password);
+    }
+
+
+if(isAdmin) return <Navigate to="/admin/dashboard" />
   return (
-    <div style={{
-      backgroundImage: bgGradient,
-    }}
-    >
-    <Container 
-    component="main" 
-    maxWidth="xs" 
-    sx={{
-      height: "100vh",
-       display: "flex",
-        justifyContent: "center",
-         alignItems: "center"
-    }}
-    >
-      <Paper 
-      elevation={5} 
-      sx={{
-          padding: 4, 
-          display: "flex", 
-          flexDirection: "column", 
-          alignItems: "center",
-          borderRadius: "12px", 
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)"
-      }}>
-
-          <Typography 
-          variant="h4" 
-          fontWeight={600} 
-          gutterBottom
+    <div
+            style={{
+              backgroundImage: bgGradient,
+            }}
           >
-              {isLogin ? "Welcome Back!" : "Create an Account"}
-          </Typography>
-          <Typography 
-          variant="body2" 
-          color="textSecondary"
-          >
-              {isLogin ? "Login to continue chatting" : "Sign up to join the conversation"}
-          </Typography>
-
-          <form 
-          style={{ 
-            width: "100%", 
-            marginTop: "1.5rem" 
-          }}
-          onSubmit={isLogin ? handleLogin : handleSignUp}>
-
-              {!isLogin && (
-                  <Stack 
-                  position="relative" 
-                  width="10rem" 
-                  margin="auto" 
-                  textAlign="center"
-                  >
-                      <Avatar 
-                      sx={{ width: "10rem", height: "10rem" }} src={avatar.preview} />
-                      <IconButton sx={{
-                          position: "absolute", 
-                          right: 0, 
-                          bottom: 0, 
-                          color: "white",
-                          backgroundColor: "rgba(0,0,0,0.5)",
-                          '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" }
-                      }} 
-                      component="label">
-                          <CameraAltIcon />
-                          <VisuallyHiddenInput type="file" onChange={avatar.changeHandler} />
-                      </IconButton>
-                  </Stack>
-              )}
-
-              {!isLogin && (
-                  <TextField 
-                  required 
-                  fullWidth 
-                  label="Name" 
-                  variant="outlined" 
-                  margin="normal"
-                      value={name.value} onChange={name.changeHandler} />
-              )}
-              {!isLogin && (
-                  <TextField 
-                  required 
-                  fullWidth 
-                  label="Bio" 
-                  variant="outlined" 
-                  margin="normal"
-                      value={bio.value} onChange={bio.changeHandler} />
-              )}
-              <TextField 
-              required 
-              fullWidth 
-              label="Username" 
-              variant="outlined" 
-              margin="normal"
-                  value={username.value} onChange={username.changeHandler} />
-
-              {username.error && 
-              <Typography 
-              color="error" 
-              variant="caption"
+            <Container
+              component={"main"}
+              maxWidth="xs"
+              sx={{
+                height: "100vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  padding: 4,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
               >
-                {username.error}
-                </Typography>}
-              <TextField 
-              required 
-              fullWidth 
-              label="Password" 
-              type="password" 
-              variant="outlined" 
-              margin="normal"
-                  value={password.value} onChange={password.changeHandler} />
-              {password.error && 
-              <Typography 
-              color="error" 
-              variant="caption"
-              >
-                {password.error}
-                </Typography>}
+                
+                  
+                    <Typography variant="h5">Admin Login</Typography>
+                    <form
+                      style={{
+                        width: "100%",
+                        marginTop: "1rem",
+                      }}
+                      onSubmit={submitHandler}
+                    >
+      
+                      <TextField
+                        required
+                        fullWidth
+                        label="Secret Key"
+                        type="password"
+                        margin="normal"
+                        variant="outlined"
+                        value={secretKey.value}
+                        onChange={secretKey.changeHandler}
+                      />
+      
+                      <Button
+                        sx={{
+                          marginTop: "1rem",
+                        }}
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        fullWidth
 
-              <Button sx={{
-                  marginTop: "1.5rem", 
-                  borderRadius: "8px",
-                  fontWeight: 600,
-                  background: "linear-gradient(135deg, #667eea, #764ba2)",
-                  '&:hover': { background: "linear-gradient(135deg, #5a67d8, #6b46c1)" }
-              }} 
-              variant="contained" 
-              type="submit" 
-              fullWidth>
-                  {isLogin ? "Login" : "Sign Up"}
-              </Button>
+                      >
+                        Login
+                      </Button>
+      
 
-              <Typography 
-              textAlign='center' 
-              m="1.5rem" 
-              fontWeight={500}>OR</Typography>
-
-              <Button 
-              variant="outlined" 
-              color="primary" 
-              fullWidth
-                  sx={{ 
-                    borderRadius: "8px", 
-                    fontWeight: 600 }}
-                    onClick={toggleLogin}>
-                  {isLogin ? "Create an Account" : "Login Instead"}
-              </Button>
-          </form>
-      </Paper>
-  </Container>
-  </div>
+                    </form>
+                  
+                
+              </Paper>
+            </Container>
+          </div>
   )
 }
 

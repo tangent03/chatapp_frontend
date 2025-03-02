@@ -8,6 +8,7 @@ import { bgGradient } from '../constants/color';
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const toggleLogin = () => setIsLogin((prev) => !prev);
 
     const name = useInputValidation("");
