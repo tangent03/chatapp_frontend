@@ -41,10 +41,10 @@ const Notifications = () => {
         <DialogTitle>Notifications</DialogTitle>
 
         {isLoading ? (
-          <Skeleton />
+          <Skeleton variant="rectangular" height={100} />
         ) : (
           <>
-            {data?.allRequests.length > 0 ? (
+            {data?.allRequests?.length > 0 ? (
               data?.allRequests?.map(({ sender, _id }) => (
                 <NotificationItem
                   sender={sender}
@@ -73,12 +73,12 @@ const NotificationItem = memo(({ sender, _id, handler }) => {
         spacing={"1rem"}
         width={"100%"}
       >
-        <Avatar />
+        <Avatar src={avatar?.url || ""} alt={name} />
 
         <Typography
           variant="body1"
           sx={{
-            flexGlow: 1,
+            flexGrow: 1,
             display: "-webkit-box",
             WebkitLineClamp: 1,
             WebkitBoxOrient: "vertical",

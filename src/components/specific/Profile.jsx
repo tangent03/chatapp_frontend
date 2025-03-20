@@ -9,6 +9,13 @@ import moment from "moment";
 import { transformImage } from "../../lib/features";
 
 const Profile = ({ user }) => {
+  if (!user) {
+    return (
+      <Typography color="white" textAlign="center" mt={2}>
+        User data not available.
+      </Typography>
+    );
+  }
   return (
     <Stack spacing={"2rem"} direction={"column"} alignItems={"center"}>
       <Avatar
