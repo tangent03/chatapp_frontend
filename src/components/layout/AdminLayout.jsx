@@ -6,8 +6,8 @@ import {
     ManageAccounts as ManageAccountsIcon,
     Menu as MenuIcon,
     Message as MessageIcon,
-  } from "@mui/icons-material";
-  import {
+} from "@mui/icons-material";
+import {
     Box,
     Drawer,
     Grid,
@@ -15,20 +15,25 @@ import {
     Stack,
     Typography,
     styled,
-  } from "@mui/material";
-  import React, { useState } from "react";
-  import { Link as LinkComponent, Navigate, useLocation } from "react-router-dom";
-  import { grayColor, matBlack } from "../../constants/color";
-  import { useDispatch, useSelector } from "react-redux";
-  import { adminLogout } from "../../redux/thunks/admin";
+} from "@mui/material";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link as LinkComponent, Navigate, useLocation } from "react-router-dom";
+import { darkBg, darkBorder, darkElevated, darkPaper, darkText, lightBlue, orange } from "../../constants/color";
+import { adminLogout } from "../../redux/thunks/admin";
   
   const Link = styled(LinkComponent)`
     text-decoration: none;
-    border-radius: 2rem;
+    border-radius: 12px;
     padding: 1rem 2rem;
-    color: black;
+    color: ${darkText};
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    
     &:hover {
-      color: rgba(0, 0, 0, 0.54);
+      color: ${lightBlue};
+      background-color: rgba(0, 184, 169, 0.08);
+      border: 1px solid rgba(0, 184, 169, 0.2);
     }
   `;
   
@@ -64,9 +69,30 @@ import {
     };
   
     return (
-      <Stack width={w} direction={"column"} p={"3rem"} spacing={"3rem"}>
-        <Typography variant="h5" textTransform={"uppercase"}>
-          Chattu
+      <Stack 
+        width={w} 
+        direction={"column"} 
+        p={"3rem"} 
+        spacing={"3rem"}
+        sx={{
+          backgroundColor: darkPaper,
+          backgroundImage: "linear-gradient(rgba(0, 184, 169, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 184, 169, 0.03) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+          height: "100%",
+          borderRight: `1px solid ${darkBorder}`,
+        }}
+      >
+        <Typography 
+          variant="h5" 
+          textTransform={"uppercase"}
+          sx={{ 
+            color: lightBlue,
+            fontWeight: 600,
+            fontFamily: "'Poppins', sans-serif",
+            textShadow: `0 0 10px ${lightBlue}40`
+          }}
+        >
+          Yapping Admin
         </Typography>
   
         <Stack spacing={"1rem"}>
@@ -76,25 +102,48 @@ import {
               to={tab.path}
               sx={
                 location.pathname === tab.path && {
-                  bgcolor: matBlack,
-                  color: "white",
-                  ":hover": { color: "white" },
+                  bgcolor: `${lightBlue}20`,
+                  color: lightBlue,
+                  borderColor: lightBlue,
+                  fontWeight: 600,
+                  ":hover": { color: lightBlue },
                 }
               }
             >
               <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
                 {tab.icon}
   
-                <Typography>{tab.name}</Typography>
+                <Typography 
+                  sx={{ 
+                    fontFamily: "'Poppins', sans-serif",
+                  }}
+                >
+                  {tab.name}
+                </Typography>
               </Stack>
             </Link>
           ))}
   
-          <Link onClick={logoutHandler}>
+          <Link 
+            onClick={logoutHandler}
+            sx={{
+              color: orange,
+              ':hover': {
+                color: orange,
+                bgcolor: `${orange}20`
+              }
+            }}
+          >
             <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
               <ExitToAppIcon />
   
-              <Typography>Logout</Typography>
+              <Typography 
+                sx={{ 
+                  fontFamily: "'Poppins', sans-serif",
+                }}
+              >
+                Logout
+              </Typography>
             </Stack>
           </Link>
         </Stack>
@@ -121,9 +170,20 @@ import {
             position: "fixed",
             right: "1rem",
             top: "1rem",
+            zIndex: 10,
           }}
         >
-          <IconButton onClick={handleMobile}>
+          <IconButton 
+            onClick={handleMobile}
+            sx={{
+              color: darkText,
+              bgcolor: darkElevated,
+              border: `1px solid ${darkBorder}`,
+              '&:hover': {
+                bgcolor: `${lightBlue}20`,
+              },
+            }}
+          >
             {isMobile ? <CloseIcon /> : <MenuIcon />}
           </IconButton>
         </Box>
@@ -138,14 +198,25 @@ import {
           md={8}
           lg={9}
           sx={{
-            bgcolor: grayColor,
+            bgcolor: darkBg,
+            backgroundImage: "linear-gradient(rgba(0, 184, 169, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 184, 169, 0.03) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
           }}
         >
           {children}
         </Grid>
   
-        <Drawer open={isMobile} onClose={handleClose}>
-          <Sidebar w="50vw" />
+        <Drawer 
+          open={isMobile} 
+          onClose={handleClose}
+          sx={{
+            '& .MuiDrawer-paper': {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+            }
+          }}
+        >
+          <Sidebar w="70vw" />
         </Drawer>
       </Grid>
     );

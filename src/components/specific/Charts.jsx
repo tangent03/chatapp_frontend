@@ -1,21 +1,20 @@
 import {
-  ArcElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Tooltip,
+    ArcElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Filler,
+    Legend,
+    LineElement,
+    LinearScale,
+    PointElement,
+    Tooltip,
 } from "chart.js";
 import React from "react";
 import { Doughnut, Line } from "react-chartjs-2";
 import {
-  orange,
-  orangeLight,
-  purple,
-  purpleLight,
+    darkTextSecondary,
+    lightBlue,
+    orange
 } from "../../constants/color";
 import { getLast7Days } from "../../lib/features";
 
@@ -41,6 +40,17 @@ const lineChartOptions = {
     title: {
       display: false,
     },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      bodyFont: {
+        family: "'Poppins', sans-serif",
+      },
+      titleFont: {
+        family: "'Poppins', sans-serif",
+      },
+    },
   },
 
   scales: {
@@ -48,12 +58,24 @@ const lineChartOptions = {
       grid: {
         display: false,
       },
+      ticks: {
+        color: darkTextSecondary,
+        font: {
+          family: "'Poppins', sans-serif",
+        },
+      }
     },
     y: {
       beginAtZero: true,
       grid: {
         display: false,
       },
+      ticks: {
+        color: darkTextSecondary,
+        font: {
+          family: "'Poppins', sans-serif",
+        },
+      }
     },
   },
 };
@@ -66,8 +88,13 @@ const LineChart = ({ value = [] }) => {
         data: value,
         label: "Messages",
         fill: true,
-        backgroundColor: purpleLight,
-        borderColor: purple,
+        backgroundColor: `${lightBlue}20`,
+        borderColor: lightBlue,
+        tension: 0.4,
+        pointBackgroundColor: lightBlue,
+        pointBorderColor: lightBlue,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       },
     ],
   };
@@ -81,6 +108,17 @@ const doughnutChartOptions = {
     legend: {
       display: false,
     },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      bodyFont: {
+        family: "'Poppins', sans-serif",
+      },
+      titleFont: {
+        family: "'Poppins', sans-serif",
+      },
+    },
   },
   cutout: 120,
 };
@@ -91,9 +129,9 @@ const DoughnutChart = ({ value = [], labels = [] }) => {
     datasets: [
       {
         data: value,
-        backgroundColor: [purpleLight, orangeLight],
-        hoverBackgroundColor: [purple, orange],
-        borderColor: [purple, orange],
+        backgroundColor: [`${lightBlue}30`, `${orange}30`],
+        hoverBackgroundColor: [`${lightBlue}80`, `${orange}80`],
+        borderColor: [lightBlue, orange],
         offset: 40,
       },
     ],

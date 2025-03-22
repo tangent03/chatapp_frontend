@@ -159,6 +159,16 @@ const api = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
+
+    updateUserBio: builder.mutation({
+      query: (bio) => ({
+        url: "user/bio",
+        method: "PUT",
+        credentials: "include",
+        body: { bio },
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -180,4 +190,5 @@ export const {
   useAddGroupMembersMutation,
   useDeleteChatMutation,
   useLeaveGroupMutation,
+  useUpdateUserBioMutation,
 } = api;

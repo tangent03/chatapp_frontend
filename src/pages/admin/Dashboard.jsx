@@ -1,36 +1,38 @@
-import { useFetchData } from "6pp";
 import {
-  AdminPanelSettings as AdminPanelSettingsIcon,
-  Group as GroupIcon,
-  Message as MessageIcon,
-  Notifications as NotificationsIcon,
-  Person as PersonIcon,
+    AdminPanelSettings as AdminPanelSettingsIcon,
+    Group as GroupIcon,
+    Message as MessageIcon,
+    Notifications as NotificationsIcon,
+    Person as PersonIcon,
+    Search as SearchIcon,
 } from "@mui/icons-material";
 import {
-  Box,
-  Container,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
+    Box,
+    Container,
+    IconButton,
+    InputAdornment,
+    Paper,
+    Skeleton,
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { DoughnutChart, LineChart } from "../../components/specific/Charts";
-import {
-  CurveButton,
-  SearchField,
-} from "../../components/styles/StyledComponents";
-import { matBlack } from "../../constants/color";
+import { CurveButton } from "../../components/styles/StyledComponents";
+import { darkBorder, darkElevated, darkPaper, darkText, darkTextSecondary, lightBlue, orange } from "../../constants/color";
 import { server } from "../../constants/config";
-import { useErrors } from "../../hooks/hook";
+import { useErrors, useFetchData } from "../../hooks/hook";
 
 const Dashboard = () => {
   const { loading, data, error } = useFetchData(
     `${server}/api/v1/admin/stats`,
     "dashboard-stats"
   );
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { stats } = data || {};
 
@@ -44,27 +46,84 @@ const Dashboard = () => {
   const Appbar = (
     <Paper
       elevation={3}
-      sx={{ padding: "2rem", margin: "2rem 0", borderRadius: "1rem" }}
+      sx={{ 
+        padding: "1.5rem", 
+        margin: "1rem 0", 
+        borderRadius: "1rem",
+        backgroundColor: darkPaper,
+        border: `1px solid ${darkBorder}`,
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+      }}
     >
       <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
-        <AdminPanelSettingsIcon sx={{ fontSize: "3rem" }} />
+        <AdminPanelSettingsIcon sx={{ fontSize: "2.5rem", color: lightBlue }} />
 
-        <SearchField placeholder="Search..." />
+        <TextField
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          size="small"
+          sx={{
+            width: { xs: '100%', sm: '300px' },
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: darkElevated,
+              color: darkText,
+              borderRadius: "8px",
+              "& fieldset": {
+                borderColor: darkBorder,
+              },
+              "&:hover fieldset": {
+                borderColor: lightBlue,
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: lightBlue,
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: darkTextSecondary }} />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-        <CurveButton>Search</CurveButton>
+        <CurveButton 
+          sx={{
+            bgcolor: lightBlue,
+            color: "white",
+            "&:hover": {
+              bgcolor: `${lightBlue}cc`,
+            },
+          }}
+        >
+          Search
+        </CurveButton>
+        
         <Box flexGrow={1} />
+        
         <Typography
           display={{
             xs: "none",
             lg: "block",
           }}
-          color={"rgba(0,0,0,0.7)"}
+          color={darkTextSecondary}
           textAlign={"center"}
+          sx={{
+            fontFamily: "'Poppins', sans-serif",
+          }}
         >
           {moment().format("dddd, D MMMM YYYY")}
         </Typography>
 
-        <NotificationsIcon />
+        <IconButton 
+          sx={{ 
+            color: orange 
+          }}
+        >
+          <NotificationsIcon />
+        </IconButton>
       </Stack>
     </Paper>
   );
@@ -97,9 +156,9 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <Skeleton height={"100vh"} />
+        <Skeleton height={"100vh"} variant="rectangular" sx={{ bgcolor: darkElevated }} />
       ) : (
-        <Container component={"main"}>
+        <Container component={"main"} sx={{ padding: "2rem" }}>
           {Appbar}
 
           <Stack
@@ -118,13 +177,24 @@ const Dashboard = () => {
             <Paper
               elevation={3}
               sx={{
-                padding: "2rem 3.5rem",
+                padding: "2rem",
                 borderRadius: "1rem",
                 width: "100%",
                 maxWidth: "45rem",
+                backgroundColor: darkPaper,
+                border: `1px solid ${darkBorder}`,
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
               }}
             >
-              <Typography margin={"2rem 0"} variant="h4">
+              <Typography 
+                margin={"1rem 0 2rem"}
+                variant="h5" 
+                sx={{
+                  color: lightBlue,
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 600,
+                }}
+              >
                 Last Messages
               </Typography>
 
@@ -134,7 +204,7 @@ const Dashboard = () => {
             <Paper
               elevation={3}
               sx={{
-                padding: "1rem ",
+                padding: "1rem",
                 borderRadius: "1rem",
                 display: "flex",
                 justifyContent: "center",
@@ -142,6 +212,9 @@ const Dashboard = () => {
                 width: { xs: "100%", sm: "50%" },
                 position: "relative",
                 maxWidth: "25rem",
+                backgroundColor: darkPaper,
+                border: `1px solid ${darkBorder}`,
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
               }}
             >
               <DoughnutChart
@@ -161,8 +234,9 @@ const Dashboard = () => {
                 width={"100%"}
                 height={"100%"}
               >
-                <GroupIcon /> <Typography>Vs </Typography>
-                <PersonIcon />
+                <GroupIcon sx={{ color: darkText }} /> 
+                <Typography sx={{ color: darkText }}>Vs</Typography>
+                <PersonIcon sx={{ color: darkText }} />
               </Stack>
             </Paper>
           </Stack>
@@ -179,29 +253,49 @@ const Widget = ({ title, value, Icon }) => (
     elevation={3}
     sx={{
       padding: "2rem",
-      margin: "2rem 0",
-      borderRadius: "1.5rem",
+      margin: "1rem 0",
+      borderRadius: "1rem",
       width: "20rem",
+      backgroundColor: darkPaper,
+      border: `1px solid ${darkBorder}`,
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        transform: "translateY(-5px)",
+        boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
+        borderColor: lightBlue,
+      },
     }}
   >
     <Stack alignItems={"center"} spacing={"1rem"}>
       <Typography
         sx={{
-          color: "rgba(0,0,0,0.7)",
+          color: lightBlue,
           borderRadius: "50%",
-          border: `5px solid ${matBlack}`,
+          border: `5px solid ${lightBlue}40`,
           width: "5rem",
           height: "5rem",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          fontWeight: 600,
+          fontFamily: "'Poppins', sans-serif",
+          fontSize: "1.5rem",
+          boxShadow: `0 0 15px ${lightBlue}30`,
         }}
       >
-        {value}
+        {value || 0}
       </Typography>
       <Stack direction={"row"} spacing={"1rem"} alignItems={"center"}>
-        {Icon}
-        <Typography>{title}</Typography>
+        <Box sx={{ color: orange }}>{Icon}</Box>
+        <Typography
+          sx={{
+            color: darkText,
+            fontFamily: "'Poppins', sans-serif",
+          }}
+        >
+          {title}
+        </Typography>
       </Stack>
     </Stack>
   </Paper>

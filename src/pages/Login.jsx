@@ -1,21 +1,22 @@
 import { useFileHandler, useInputValidation } from "6pp";
 import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
 import {
-  Avatar,
-  Button,
-  Container,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
+    Avatar,
+    Box,
+    Button,
+    Container,
+    IconButton,
+    Paper,
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { VisuallyHiddenInput } from "../components/styles/StyledComponents";
-import { bgGradient } from "../constants/color";
+import { bgGradient, lightBlue, orange } from "../constants/color";
 import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
 import { usernameValidator } from "../utils/validators";
@@ -114,30 +115,100 @@ const Login = () => {
     <div
       style={{
         backgroundImage: bgGradient,
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Background decorative elements */}
+      <div 
+        style={{
+          position: "absolute",
+          width: "300px",
+          height: "300px",
+          borderRadius: "50%",
+          background: "rgba(255, 126, 103, 0.1)",
+          top: "-50px",
+          right: "-50px",
+          zIndex: 0,
+        }}
+      />
+      <div 
+        style={{
+          position: "absolute",
+          width: "200px",
+          height: "200px",
+          borderRadius: "50%",
+          background: "rgba(92, 225, 230, 0.15)",
+          bottom: "50px",
+          left: "100px",
+          zIndex: 0,
+        }}
+      />
+      
       <Container
         component={"main"}
         maxWidth="xs"
         sx={{
-          height: "100vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Paper
-          elevation={3}
+          elevation={4}
           sx={{
             padding: 4,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            borderRadius: "16px",
+            background: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+            transition: "transform 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-5px)",
+            },
           }}
         >
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            marginBottom: 2,
+            gap: 1.5
+          }}>
+            <Avatar sx={{ bgcolor: lightBlue, width: 40, height: 40 }}>
+              <CameraAltIcon />
+            </Avatar>
+            <Typography 
+              variant="h5" 
+              fontWeight="600" 
+              color={lightBlue}
+              fontFamily="'Poppins', sans-serif"
+              letterSpacing="0.5px"
+            >
+              Yapping!
+            </Typography>
+          </Box>
+
           {isLogin ? (
             <>
-              <Typography variant="h5">Login</Typography>
+              <Typography 
+                variant="h6" 
+                fontWeight="500" 
+                mb={3} 
+                color="#555"
+                fontFamily="'Poppins', sans-serif"
+                textAlign="center"
+              >
+                Welcome back! Sign in to continue
+              </Typography>
               <form
                 style={{
                   width: "100%",
@@ -149,53 +220,78 @@ const Login = () => {
                   required
                   fullWidth
                   label="Username"
-                  margin="normal"
-                  variant="outlined"
                   value={username.value}
                   onChange={username.changeHandler}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
-
                 <TextField
                   required
                   fullWidth
-                  label="Password"
                   type="password"
-                  margin="normal"
-                  variant="outlined"
+                  label="Password"
                   value={password.value}
                   onChange={password.changeHandler}
+                  sx={{ mb: 3 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
 
                 <Button
-                  sx={{
-                    marginTop: "1rem",
-                  }}
-                  variant="contained"
-                  color="primary"
                   type="submit"
                   fullWidth
+                  variant="contained"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: "10px",
+                    bgcolor: lightBlue,
+                    "&:hover": {
+                      bgcolor: orange,
+                    },
+                    mb: 2,
+                    fontWeight: "500",
+                  }}
                   disabled={isLoading}
                 >
-                  Login
+                  {isLoading ? "Logging In..." : "Login"}
                 </Button>
 
-                <Typography textAlign={"center"} m={"1rem"}>
-                  OR
+                <Typography textAlign={"center"}>
+                  Don't have an account?{" "}
+                  <Typography
+                    component={"span"}
+                    color={orange}
+                    sx={{
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }}
+                    onClick={toggleLogin}
+                  >
+                    Sign Up
+                  </Typography>
                 </Typography>
-
-                <Button
-                  disabled={isLoading}
-                  fullWidth
-                  variant="text"
-                  onClick={toggleLogin}
-                >
-                  Sign Up Instead
-                </Button>
               </form>
             </>
           ) : (
             <>
-              <Typography variant="h5">Sign Up</Typography>
+              <Typography 
+                variant="h6" 
+                fontWeight="500" 
+                mb={3} 
+                color="#555"
+                fontFamily="'Poppins', sans-serif"
+                textAlign="center"
+              >
+                Create your account to get started
+              </Typography>
               <form
                 style={{
                   width: "100%",
@@ -209,6 +305,8 @@ const Login = () => {
                       width: "10rem",
                       height: "10rem",
                       objectFit: "contain",
+                      marginBottom: "1rem",
+                      border: `3px solid ${lightBlue}`,
                     }}
                     src={avatar.preview}
                   />
@@ -219,9 +317,9 @@ const Login = () => {
                       bottom: "0",
                       right: "0",
                       color: "white",
-                      bgcolor: "rgba(0,0,0,0.5)",
-                      ":hover": {
-                        bgcolor: "rgba(0,0,0,0.7)",
+                      bgcolor: orange,
+                      "&:hover": {
+                        bgcolor: lightBlue,
                       },
                     }}
                     component="label"
@@ -236,89 +334,94 @@ const Login = () => {
                   </IconButton>
                 </Stack>
 
-                {avatar.error && (
-                  <Typography
-                    m={"1rem auto"}
-                    width={"fit-content"}
-                    display={"block"}
-                    color="error"
-                    variant="caption"
-                  >
-                    {avatar.error}
-                  </Typography>
-                )}
-
                 <TextField
                   required
                   fullWidth
                   label="Name"
-                  margin="normal"
-                  variant="outlined"
                   value={name.value}
                   onChange={name.changeHandler}
-                />
-
-                <TextField
-                  required
-                  fullWidth
-                  label="Bio"
-                  margin="normal"
-                  variant="outlined"
-                  value={bio.value}
-                  onChange={bio.changeHandler}
+                  sx={{ mb: 2, mt: 2 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
                 <TextField
                   required
                   fullWidth
                   label="Username"
-                  margin="normal"
-                  variant="outlined"
                   value={username.value}
                   onChange={username.changeHandler}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
-
-                {username.error && (
-                  <Typography color="error" variant="caption">
-                    {username.error}
-                  </Typography>
-                )}
-
                 <TextField
                   required
                   fullWidth
-                  label="Password"
+                  label="Bio"
+                  value={bio.value}
+                  onChange={bio.changeHandler}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
+                />
+                <TextField
+                  required
+                  fullWidth
                   type="password"
-                  margin="normal"
-                  variant="outlined"
+                  label="Password"
                   value={password.value}
                   onChange={password.changeHandler}
+                  sx={{ mb: 3 }}
+                  InputProps={{
+                    sx: {
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
 
                 <Button
-                  sx={{
-                    marginTop: "1rem",
-                  }}
-                  variant="contained"
-                  color="primary"
                   type="submit"
                   fullWidth
+                  variant="contained"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: "10px",
+                    bgcolor: lightBlue,
+                    "&:hover": {
+                      bgcolor: orange,
+                    },
+                    mb: 2,
+                    fontWeight: "500",
+                  }}
                   disabled={isLoading}
                 >
-                  Sign Up
+                  {isLoading ? "Signing Up..." : "Sign Up"}
                 </Button>
 
-                <Typography textAlign={"center"} m={"1rem"}>
-                  OR
+                <Typography textAlign={"center"}>
+                  Already have an account?{" "}
+                  <Typography
+                    component={"span"}
+                    color={orange}
+                    sx={{
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      fontWeight: "500",
+                    }}
+                    onClick={toggleLogin}
+                  >
+                    Login
+                  </Typography>
                 </Typography>
-
-                <Button
-                  disabled={isLoading}
-                  fullWidth
-                  variant="text"
-                  onClick={toggleLogin}
-                >
-                  Login Instead
-                </Button>
               </form>
             </>
           )}

@@ -1,12 +1,12 @@
 import { Drawer, Grid, Skeleton } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { darkBg, darkBorder, darkPaper } from "../../constants/color";
 import {
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
-  ONLINE_USERS,
-  REFETCH_CHATS,
+  REFETCH_CHATS
 } from "../../constants/events";
 import { useErrors, useSocketEvents } from "../../hooks/hook";
 import { getOrSaveFromStorage } from "../../lib/features";
@@ -37,11 +37,9 @@ const AppLayout = () => (WrappedComponent) => {
     const chatId = params.chatId;
     const deleteMenuAnchor = useRef(null);
 
-    const [onlineUsers, setOnlineUsers] = useState([]);
-
     const { isMobile } = useSelector((state) => state.misc);
     const { user } = useSelector((state) => state.auth);
-    const { newMessagesAlert } = useSelector((state) => state.chat);
+    const { newMessagesAlert, onlineUsers } = useSelector((state) => state.chat);
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
@@ -50,6 +48,10 @@ const AppLayout = () => (WrappedComponent) => {
     useEffect(() => {
       getOrSaveFromStorage({ key: NEW_MESSAGE_ALERT, value: newMessagesAlert });
     }, [newMessagesAlert]);
+
+    useEffect(() => {
+      console.log("AppLayout - onlineUsers from Redux:", onlineUsers);
+    }, [onlineUsers]);
 
     const handleDeleteChat = (e, chatId, groupChat) => {
       dispatch(setIsDeleteMenu(true));
@@ -76,15 +78,10 @@ const AppLayout = () => (WrappedComponent) => {
       navigate("/");
     }, [refetch, navigate]);
 
-    const onlineUsersListener = useCallback((data) => {
-      setOnlineUsers(data);
-    }, []);
-
     const eventHandlers = {
       [NEW_MESSAGE_ALERT]: newMessageAlertListener,
       [NEW_REQUEST]: newRequestListener,
       [REFETCH_CHATS]: refetchListener,
-      [ONLINE_USERS]: onlineUsersListener,
     };
 
     useSocketEvents(socket, eventHandlers);
@@ -102,7 +99,18 @@ const AppLayout = () => (WrappedComponent) => {
         {isLoading ? (
           <Skeleton />
         ) : (
-          <Drawer open={isMobile} onClose={handleMobileClose}>
+          <Drawer 
+            open={isMobile} 
+            onClose={handleMobileClose}
+            sx={{
+              "& .MuiDrawer-paper": {
+                backgroundColor: darkBg,
+                backgroundImage: "linear-gradient(rgba(0, 184, 169, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 184, 169, 0.03) 1px, transparent 1px)",
+                backgroundSize: "20px 20px",
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
+              }
+            }}
+          >
             <ChatList
               w="70vw"
               chats={data?.chats}
@@ -114,15 +122,26 @@ const AppLayout = () => (WrappedComponent) => {
           </Drawer>
         )}
 
-        <Grid container height={"calc(100vh - 4rem)"}>
+        <Grid 
+          container 
+          height={"calc(100vh - 4rem)"}
+          sx={{ 
+            backgroundColor: darkBg,
+            backgroundImage: "linear-gradient(rgba(0, 184, 169, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 184, 169, 0.03) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            overflow: "hidden"
+          }}
+        >
           <Grid
             item
             sm={4}
             md={3}
             sx={{
               display: { xs: "none", sm: "block" },
+              borderRight: `1px solid ${darkBorder}`,
+              height: "100%",
+              overflowY: "auto"
             }}
-            height={"100%"}
           >
             {isLoading ? (
               <Skeleton />
@@ -136,19 +155,33 @@ const AppLayout = () => (WrappedComponent) => {
               />
             )}
           </Grid>
-          <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
-            <WrappedComponent {...props} chatId={chatId} user={user} />
+          <Grid 
+            item 
+            xs={12} 
+            sm={8} 
+            md={5} 
+            lg={6} 
+            sx={{
+              height: "100%",
+              borderRight: { md: `1px solid ${darkBorder}`, xs: "none" },
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column"
+            }}
+          >
+            <WrappedComponent {...props} />
           </Grid>
 
           <Grid
             item
             md={4}
             lg={3}
-            height={"100%"}
             sx={{
               display: { xs: "none", md: "block" },
               padding: "2rem",
-              bgcolor: "rgba(0,0,0,0.85)",
+              bgcolor: darkPaper,
+              height: "100%",
+              overflowY: "auto"
             }}
           >
             <Profile user={user} />

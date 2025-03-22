@@ -1,25 +1,23 @@
-import { useFetchData } from "6pp";
-import { Avatar, Box, Stack } from "@mui/material";
+import { Avatar, Box, Skeleton, Stack } from "@mui/material";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import RenderAttachment from "../../components/shared/RenderAttachment";
 import Table from "../../components/shared/Table";
+import { darkElevated, darkText } from "../../constants/color";
 import { server } from "../../constants/config";
-import { useErrors } from "../../hooks/hook";
+import { useErrors, useFetchData } from "../../hooks/hook";
 import { fileFormat, transformImage } from "../../lib/features";
 
 const columns = [
   {
     field: "id",
     headerName: "ID",
-    headerClassName: "table-header",
     width: 200,
   },
   {
     field: "attachments",
     headerName: "Attachments",
-    headerClassName: "table-header",
     width: 200,
     renderCell: (params) => {
       const { attachments } = params.row;
@@ -36,7 +34,7 @@ const columns = [
                   download
                   target="_blank"
                   style={{
-                    color: "black",
+                    color: darkText,
                   }}
                 >
                   {RenderAttachment(file, url)}
@@ -51,17 +49,21 @@ const columns = [
   {
     field: "content",
     headerName: "Content",
-    headerClassName: "table-header",
     width: 400,
   },
   {
     field: "sender",
     headerName: "Sent By",
-    headerClassName: "table-header",
     width: 200,
     renderCell: (params) => (
       <Stack direction={"row"} spacing={"1rem"} alignItems={"center"}>
-        <Avatar alt={params.row.sender.name} src={params.row.sender.avatar} />
+        <Avatar 
+          alt={params.row.sender.name} 
+          src={params.row.sender.avatar}
+          sx={{
+            border: "2px solid rgba(0, 184, 169, 0.5)",
+          }}
+        />
         <span>{params.row.sender.name}</span>
       </Stack>
     ),
@@ -69,19 +71,16 @@ const columns = [
   {
     field: "chat",
     headerName: "Chat",
-    headerClassName: "table-header",
     width: 220,
   },
   {
     field: "groupChat",
     headerName: "Group Chat",
-    headerClassName: "table-header",
     width: 100,
   },
   {
     field: "createdAt",
     headerName: "Time",
-    headerClassName: "table-header",
     width: 250,
   },
 ];
@@ -120,7 +119,7 @@ const MessageManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <Skeleton height={"100vh"} />
+        <Skeleton height={"100vh"} variant="rectangular" sx={{ bgcolor: darkElevated }} />
       ) : (
         <Table
           heading={"All Messages"}

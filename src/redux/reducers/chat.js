@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
+import { getOrSaveFromStorage } from "../../lib/features";
 
 const initialState = {
   notificationCount: 0,
+  onlineUsers: [],
   newMessagesAlert: getOrSaveFromStorage({
     key: NEW_MESSAGE_ALERT,
     get: true,
@@ -48,6 +49,10 @@ const chatSlice = createSlice({
         (item) => item.chatId !== action.payload
       );
     },
+    
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload;
+    },
   },
 });
 
@@ -57,4 +62,5 @@ export const {
   resetNotificationCount,
   setNewMessagesAlert,
   removeNewMessagesAlert,
+  setOnlineUsers,
 } = chatSlice.actions;

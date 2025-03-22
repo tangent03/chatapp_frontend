@@ -1,23 +1,21 @@
-import { useFetchData } from "6pp";
 import { Avatar, Skeleton } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import Table from "../../components/shared/Table";
+import { darkElevated } from "../../constants/color";
 import { server } from "../../constants/config";
-import { useErrors } from "../../hooks/hook";
+import { useErrors, useFetchData } from "../../hooks/hook";
 import { transformImage } from "../../lib/features";
 
 const columns = [
   {
     field: "id",
     headerName: "ID",
-    headerClassName: "table-header",
     width: 200,
   },
   {
     field: "avatar",
     headerName: "Avatar",
-    headerClassName: "table-header",
     width: 150,
     renderCell: (params) => (
       <Avatar alt={params.row.name} src={params.row.avatar} />
@@ -27,25 +25,21 @@ const columns = [
   {
     field: "name",
     headerName: "Name",
-    headerClassName: "table-header",
     width: 200,
   },
   {
     field: "username",
     headerName: "Username",
-    headerClassName: "table-header",
     width: 200,
   },
   {
     field: "friends",
     headerName: "Friends",
-    headerClassName: "table-header",
     width: 150,
   },
   {
     field: "groups",
     headerName: "Groups",
-    headerClassName: "table-header",
     width: 200,
   },
 ];
@@ -79,7 +73,7 @@ const UserManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <Skeleton height={"100vh"} />
+        <Skeleton height={"100vh"} variant="rectangular" sx={{ bgcolor: darkElevated }} />
       ) : (
         <Table heading={"All Users"} columns={columns} rows={rows} />
       )}

@@ -1,39 +1,55 @@
+import { useInfiniteScrollTop } from "6pp";
+import {
+  AttachFile as AttachFileIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+} from "@mui/icons-material";
+import { Box, IconButton, InputAdornment, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import React, {
-  Fragment,
   useCallback,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
-import AppLayout from "../components/layout/AppLayout";
-import { IconButton, Skeleton, Stack } from "@mui/material";
-import { grayColor, orange } from "../constants/color";
-import {
-  AttachFile as AttachFileIcon,
-  Send as SendIcon,
-} from "@mui/icons-material";
-import { InputBox } from "../components/styles/StyledComponents";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import CallButtons from "../components/call/CallButtons";
 import FileMenu from "../components/dialogs/FileMenu";
+import AppLayout from "../components/layout/AppLayout";
+import { TypingLoader } from "../components/layout/Loaders";
 import MessageComponent from "../components/shared/MessageComponent";
-import { getSocket } from "../socket";
+import { InputBox } from "../components/styles/StyledComponents";
+import {
+  darkBg,
+  darkBorder,
+  darkElevated,
+  darkPaper,
+  darkText,
+  darkTextSecondary,
+  lightBlue,
+  orange
+} from "../constants/color";
 import {
   ALERT,
   CHAT_JOINED,
   CHAT_LEAVED,
+  MESSAGE_REACTION,
+  MESSAGE_SEEN,
   NEW_MESSAGE,
   START_TYPING,
   STOP_TYPING,
 } from "../constants/events";
-import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
 import { useErrors, useSocketEvents } from "../hooks/hook";
-import { useInfiniteScrollTop } from "6pp";
-import { useDispatch } from "react-redux";
-import { setIsFileMenu } from "../redux/reducers/misc";
+import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
 import { removeNewMessagesAlert } from "../redux/reducers/chat";
-import { TypingLoader } from "../components/layout/Loaders";
-import { useNavigate } from "react-router-dom";
+import { setIsFileMenu } from "../redux/reducers/misc";
+import { getSocket } from "../socket";
 
-const Chat = ({ chatId, user }) => {
+const Chat = () => {
+  const { chatId } = useParams();
+  const { user } = useSelector((state) => state.auth);
   const socket = getSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -45,6 +61,11 @@ const Chat = ({ chatId, user }) => {
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
+  
+  // Search functionality
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState(false);
+  const [filteredMessages, setFilteredMessages] = useState([]);
 
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
@@ -86,8 +107,10 @@ const Chat = ({ chatId, user }) => {
   };
 
   const handleFileOpen = (e) => {
-    dispatch(setIsFileMenu(true));
     setFileMenuAnchor(e.currentTarget);
+    setTimeout(() => {
+      dispatch(setIsFileMenu(true));
+    }, 0);
   };
 
   const submitHandler = (e) => {
@@ -95,28 +118,119 @@ const Chat = ({ chatId, user }) => {
 
     if (!message.trim()) return;
 
+    // Create a local message object to immediately display in the UI
+    const localMessage = {
+      _id: `local_${Date.now()}`,
+      content: message,
+      sender: {
+        _id: user._id,
+        name: user.name,
+      },
+      chat: chatId,
+      createdAt: new Date().toISOString(),
+      seen: false,
+      reactions: [],
+    };
+
+    // Add message locally for immediate display
+    setMessages((prev) => [...prev, localMessage]);
+
+    // Scroll to bottom to show new message
+    setTimeout(() => {
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 10);
+
     // Emitting the message to the server
     socket.emit(NEW_MESSAGE, { chatId, members, message });
     setMessage("");
+  };
+
+  // Handle message search
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    
+    if (query.trim() === "") {
+      setFilteredMessages([]);
+      return;
+    }
+    
+    const allMsgs = [...oldMessages, ...messages];
+    const filtered = allMsgs.filter(
+      msg => msg.content && msg.content.toLowerCase().includes(query)
+    );
+    setFilteredMessages(filtered);
+  };
+  
+  // Toggle search mode
+  const toggleSearchMode = () => {
+    setSearchMode(!searchMode);
+    if (!searchMode) {
+      setSearchQuery("");
+      setFilteredMessages([]);
+    }
   };
 
   useEffect(() => {
     socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessagesAlert(chatId));
 
+    // Add error event listener
+    const handleError = (error) => {
+      console.error("Socket error:", error);
+      toast.error(error.message || "Error sending message");
+    };
+
+    // Force reconnect socket if not connected
+    if (!socket.connected) {
+      console.log("Socket not connected, attempting to reconnect");
+      socket.connect();
+    }
+
+    socket.on("ERROR", handleError);
+
     return () => {
       setMessages([]);
       setMessage("");
       setOldMessages([]);
       setPage(1);
+      setSearchMode(false);
+      setSearchQuery("");
+      setFilteredMessages([]);
       socket.emit(CHAT_LEAVED, { userId: user._id, members });
+      socket.off("ERROR", handleError);
     };
   }, [chatId]);
 
+  // Mark messages as seen when viewed
   useEffect(() => {
-    if (bottomRef.current)
+    if (messages.length > 0 || oldMessages.length > 0) {
+      const allMsgs = [...oldMessages, ...messages];
+      // Get messages from other users that haven't been seen
+      const unseenMessages = allMsgs.filter(
+        msg => msg.sender?._id !== user._id && !msg.seen
+      );
+      
+      console.log("Found unseen messages:", unseenMessages.length);
+      
+      // Mark each unseen message as seen
+      unseenMessages.forEach(msg => {
+        console.log("Marking message as seen:", msg._id);
+        socket.emit(MESSAGE_SEEN, { 
+          messageId: msg._id,
+          chatId,
+          userId: user._id
+        });
+      });
+    }
+  }, [messages, oldMessages, chatId, user._id]);
+
+  useEffect(() => {
+    if (bottomRef.current && !searchMode)
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, searchMode]);
 
   useEffect(() => {
     if (chatDetails.isError) return navigate("/");
@@ -126,9 +240,56 @@ const Chat = ({ chatId, user }) => {
     (data) => {
       if (data.chatId !== chatId) return;
 
-      setMessages((prev) => [...prev, data.message]);
+      console.log("Received new message:", data.message);
+
+      // Force an immediate state update when we receive a message
+      if (data.message.sender?._id !== user._id) {
+        console.log("Received message from another user, immediately updating UI");
+        
+        // Don't check for existing messages, just add it to ensure it appears
+        setMessages(prev => [...prev, data.message]);
+        
+        // Immediately scroll to the new message
+        setTimeout(() => {
+          if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 10);
+        
+        // Mark message as seen
+        socket.emit(MESSAGE_SEEN, { 
+          messageId: data.message._id,
+          chatId,
+          userId: user._id
+        });
+      } else {
+        // This is a message from current user (confirmation from server)
+        setMessages(prev => {
+          // Replace local message with server message
+          const updatedMessages = prev.map(msg => {
+            if (
+              msg.content === data.message.content && 
+              msg._id.toString().includes('local_')
+            ) {
+              return data.message;
+            }
+            return msg;
+          });
+          
+          // If we didn't find a local message to replace, add the new one
+          // This handles edge cases where the local message wasn't added
+          if (!prev.some(msg => 
+            msg.content === data.message.content && 
+            msg._id.toString().includes('local_'))
+          ) {
+            return [...updatedMessages, data.message];
+          }
+          
+          return updatedMessages;
+        });
+      }
     },
-    [chatId]
+    [chatId, user._id]
   );
 
   const startTypingListener = useCallback(
@@ -165,34 +326,238 @@ const Chat = ({ chatId, user }) => {
     },
     [chatId]
   );
+  
+  // Handle message reaction updates
+  const messageReactionListener = useCallback(
+    (data) => {
+      if (data.chatId !== chatId) return;
+      
+      console.log("Received message reaction event:", data);
+      
+      if (!data.messageId || !Array.isArray(data.reactions)) {
+        console.error("Invalid reaction data:", data);
+        return;
+      }
+      
+      // Update messages with new reaction data using function form
+      setMessages(prev => 
+        prev.map(msg => {
+          if (msg._id === data.messageId) {
+            console.log("Updating message reactions:", msg._id, data.reactions);
+            return { ...msg, reactions: data.reactions || [] };
+          }
+          return msg;
+        })
+      );
+      
+      // Also update oldMessages using function form
+      setOldMessages(prev => 
+        prev.map(msg => {
+          if (msg._id === data.messageId) {
+            console.log("Updating old message reactions:", msg._id, data.reactions);
+            return { ...msg, reactions: data.reactions || [] };
+          }
+          return msg;
+        })
+      );
+    },
+    [chatId] // Only depend on chatId
+  );
+  
+  // Handle seen status updates
+  const messageSeenListener = useCallback(
+    (data) => {
+      if (data.chatId !== chatId) return;
+      
+      console.log("Received message seen event:", data);
+      
+      // Update messages with seen status using function form
+      setMessages(prev => 
+        prev.map(msg => {
+          if (msg._id === data.messageId) {
+            console.log("Updating message seen status:", msg._id);
+            return { ...msg, seen: true };
+          }
+          return msg;
+        })
+      );
+      
+      // Also update oldMessages using function form
+      setOldMessages(prev => 
+        prev.map(msg => {
+          if (msg._id === data.messageId) {
+            console.log("Updating old message seen status:", msg._id);
+            return { ...msg, seen: true };
+          }
+          return msg;
+        })
+      );
+    },
+    [chatId] // Only depend on chatId
+  );
 
   const eventHandler = {
     [ALERT]: alertListener,
     [NEW_MESSAGE]: newMessagesListener,
     [START_TYPING]: startTypingListener,
     [STOP_TYPING]: stopTypingListener,
+    [MESSAGE_REACTION]: messageReactionListener,
+    [MESSAGE_SEEN]: messageSeenListener,
   };
 
   useSocketEvents(socket, eventHandler);
 
   useErrors(errors);
 
-  const allMessages = [...oldMessages, ...messages];
+  const allMessages = searchMode && searchQuery 
+    ? filteredMessages 
+    : [...oldMessages, ...messages];
+
+  // Add a refresh button to the chat UI
+  const handleRefreshChat = useCallback(() => {
+    // Reset chat state
+    setMessages([]);
+    setOldMessages([]);
+    setPage(1);
+    
+    // Refetch chat details and messages
+    chatDetails.refetch();
+    oldMessagesChunk.refetch();
+    
+    toast.success("Chat refreshed");
+  }, [chatDetails, oldMessagesChunk]);
 
   return chatDetails.isLoading ? (
     <Skeleton />
   ) : (
-    <Fragment>
+    <Box
+      height={"calc(100vh - 4rem)"}
+      sx={{
+        backgroundColor: darkBg,
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden"
+      }}
+    >
+      {/* Chat Header */}
+      <Stack
+        direction={"row"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+        p={"1rem"}
+        bgcolor={darkPaper}
+        borderBottom={`1px solid ${darkBorder}`}
+        sx={{ flexShrink: 0 }}
+      >
+        <Typography
+          sx={{
+            color: darkText,
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: "500",
+          }}
+        >
+          {chatDetails.data?.chat.name || "Chat"}
+        </Typography>
+
+        <Stack direction="row" spacing={2} alignItems="center">
+          {/* Add call buttons if this is a one-to-one chat (not a group) */}
+          {chatDetails.data?.chat && (
+            <CallButtons 
+              chatId={chatDetails.data.chat.members.find(
+                member => member.toString() !== user._id.toString()
+              )?.toString()}
+              receiverName={chatDetails.data.chat.name}
+              isGroup={chatDetails.data.chat.groupChat}
+            />
+          )}
+
+          <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
+            {searchMode ? (
+              <TextField
+                variant="standard"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search messages..."
+                sx={{
+                  width: "200px",
+                  "& .MuiInput-underline:before": {
+                    borderBottomColor: darkBorder,
+                  },
+                  "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
+                    borderBottomColor: lightBlue,
+                  },
+                  "& .MuiInput-underline:after": {
+                    borderBottomColor: lightBlue,
+                  },
+                  "& .MuiInputBase-input": {
+                    color: darkText,
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <SearchIcon sx={{ color: darkTextSecondary }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            ) : null}
+            
+            <IconButton 
+              onClick={toggleSearchMode}
+              sx={{
+                color: searchMode ? lightBlue : darkTextSecondary,
+                "&:hover": {
+                  color: lightBlue,
+                }
+              }}
+            >
+              <SearchIcon />
+            </IconButton>
+            
+            <IconButton 
+              onClick={handleRefreshChat}
+              sx={{
+                color: darkTextSecondary,
+                "&:hover": {
+                  color: lightBlue,
+                }
+              }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Stack>
+        </Stack>
+      </Stack>
+
+      {/* Messages Container */}
       <Stack
         ref={containerRef}
         boxSizing={"border-box"}
         padding={"1rem"}
         spacing={"1rem"}
-        bgcolor={grayColor}
-        height={"90%"}
+        bgcolor={darkBg}
         sx={{
+          flexGrow: 1,
           overflowX: "hidden",
           overflowY: "auto",
+          backgroundImage: "linear-gradient(rgba(0, 184, 169, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 184, 169, 0.03) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "rgba(0,0,0,0.2)",
+            borderRadius: "10px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(0, 184, 169, 0.3)",
+            borderRadius: "10px",
+            "&:hover": {
+              background: "rgba(0, 184, 169, 0.5)",
+            },
+          },
         }}
       >
         {allMessages.map((i) => (
@@ -204,56 +569,90 @@ const Chat = ({ chatId, user }) => {
         <div ref={bottomRef} />
       </Stack>
 
+      {/* Message Input Form */}
       <form
         style={{
-          height: "10%",
+          backgroundColor: darkElevated,
+          borderRadius: "0 0 12px 12px",
+          boxShadow: "0 -2px 10px rgba(0,0,0,0.2)",
+          borderTop: `1px solid ${darkBorder}`,
+          flexShrink: 0,
+          padding: "0.5rem 0",
+          position: "sticky",
+          bottom: 0,
+          zIndex: 10
         }}
         onSubmit={submitHandler}
       >
         <Stack
           direction={"row"}
-          height={"100%"}
-          padding={"1rem"}
+          padding={"0.5rem 1.2rem"}
           alignItems={"center"}
           position={"relative"}
         >
           <IconButton
             sx={{
               position: "absolute",
-              left: "1.5rem",
+              left: "1.8rem",
               rotate: "30deg",
+              color: darkTextSecondary,
+              transition: "all 0.2s ease",
+              "&:hover": {
+                color: orange,
+                backgroundColor: `rgba(255, 126, 103, 0.1)`,
+              },
             }}
             onClick={handleFileOpen}
           >
             <AttachFileIcon />
           </IconButton>
 
+          <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
+
           <InputBox
             placeholder="Type Message Here..."
             value={message}
             onChange={messageOnChange}
+            sx={{
+              fontSize: "1rem",
+              fontWeight: 400,
+              backgroundColor: darkPaper,
+              color: darkText,
+              height: "44px",
+              borderRadius: "22px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              padding: "0 3rem",
+              marginRight: "0.8rem",
+              "&::placeholder": {
+                opacity: 0.7,
+                color: darkTextSecondary,
+              }
+            }}
           />
 
-          <IconButton
-            type="submit"
-            sx={{
-              rotate: "-30deg",
-              bgcolor: orange,
-              color: "white",
-              marginLeft: "1rem",
-              padding: "0.5rem",
-              "&:hover": {
-                bgcolor: "error.dark",
-              },
-            }}
-          >
-            <SendIcon />
-          </IconButton>
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              type="submit"
+              sx={{
+                rotate: "-30deg",
+                bgcolor: lightBlue,
+                color: "white",
+                padding: "0.7rem",
+                marginLeft: "0.4rem",
+                transition: "all 0.3s ease",
+                boxShadow: "0 4px 8px rgba(0, 184, 169, 0.3)",
+                "&:hover": {
+                  bgcolor: orange,
+                  transform: "scale(1.05)",
+                },
+              }}
+            >
+              <SendIcon fontSize="small" />
+            </IconButton>
+          </Stack>
         </Stack>
       </form>
-
-      <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
-    </Fragment>
+    </Box>
   );
 };
 

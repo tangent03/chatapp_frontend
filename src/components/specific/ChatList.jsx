@@ -15,8 +15,31 @@ const ChatList = ({
   ],
   handleDeleteChat,
 }) => {
+  console.log("ChatList - onlineUsers:", onlineUsers);
+  
   return (
-    <Stack width={w} direction={"column"} overflow={"auto"} height={"100%"}>
+    <Stack 
+      width={w} 
+      direction={"column"} 
+      overflow={"auto"} 
+      height={"100%"}
+      sx={{
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "rgba(0,0,0,0.1)",
+          borderRadius: "10px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "rgba(0, 184, 169, 0.2)",
+          borderRadius: "10px",
+          "&:hover": {
+            background: "rgba(0, 184, 169, 0.3)",
+          },
+        },
+      }}
+    >
       {chats?.map((data, index) => {
         const { avatar, _id, name, groupChat, members } = data;
 
@@ -25,8 +48,11 @@ const ChatList = ({
         );
 
         const isOnline = members?.some((member) =>
-          onlineUsers.includes(member)
+          onlineUsers.includes(member.toString())
         );
+        
+        console.log(`Chat ${name} - members:`, members);
+        console.log(`Chat ${name} - isOnline:`, isOnline);
 
         return (
           <ChatItem
@@ -36,6 +62,7 @@ const ChatList = ({
             avatar={avatar}
             name={name}
             _id={_id}
+            members={members}
             key={_id}
             groupChat={groupChat}
             sameSender={chatId === _id}
