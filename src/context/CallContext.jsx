@@ -94,19 +94,15 @@ export const CallProvider = ({ children }) => {
         return false;
       }
       
-      console.log(`Initiating ${isVideo ? 'video' : 'voice'} call to ${receiverName} (${receiverId})`);
-      
       setIsVideoCall(isVideo);
       setCallStatus('calling');
       
       // Get media stream
-      console.log(`Requesting user media: audio=${true}, video=${isVideo}`);
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: isVideo,
       });
       
-      console.log('Media stream obtained:', stream.id);
       setLocalStream(stream);
       
       // Store call data
@@ -119,15 +115,12 @@ export const CallProvider = ({ children }) => {
         timestamp: new Date().toISOString(),
       };
       
-      console.log('Call data prepared:', call);
       setCallData(call);
       
       // Send call request to receiver
-      console.log('Emitting CALL_REQUEST event');
       socket.emit(CALL_REQUEST, call);
       
       // Initialize WebRTC
-      console.log('Creating peer connection');
       createPeerConnection(stream);
       
       return true;
@@ -153,7 +146,6 @@ export const CallProvider = ({ children }) => {
       
       // Handle ICE candidates
       peerConnection.current.onicecandidate = (event) => {
-        console.log('Handling ICE candidate event:', event);
         if (event.candidate) {
           const socket = socketRef.current;
           if (!socket) {
@@ -165,7 +157,6 @@ export const CallProvider = ({ children }) => {
             ? callData.receiverId 
             : callData.callerId;
           
-          console.log('Sending ICE candidate to:', targetId);
           socket.emit(ICE_CANDIDATE, {
             to: targetId,
             candidate: event.candidate,
@@ -175,7 +166,6 @@ export const CallProvider = ({ children }) => {
       
       // Handle connection state changes
       peerConnection.current.onconnectionstatechange = (event) => {
-        console.log('Connection state:', peerConnection.current.connectionState);
         if (peerConnection.current.connectionState === 'disconnected' ||
             peerConnection.current.connectionState === 'failed') {
           endCall();
@@ -184,12 +174,9 @@ export const CallProvider = ({ children }) => {
       
       // Handle incoming tracks
       peerConnection.current.ontrack = (event) => {
-        console.log('Remote track received:', event);
         if (event.streams && event.streams[0]) {
-          console.log('Setting remote stream with tracks:', event.streams[0].getTracks().length);
           const newStream = new MediaStream();
           event.streams[0].getTracks().forEach(track => {
-            console.log('Adding track to remote stream:', track.kind);
             newStream.addTrack(track);
           });
           setRemoteStream(newStream);
@@ -207,9 +194,6 @@ export const CallProvider = ({ children }) => {
   
   // End an active call
   const endCall = () => {
-    console.log('Ending call, current status:', callStatus);
-    console.log('Call data:', callData);
-    
     const socket = socketRef.current;
     if (!socket) {
       console.error('No socket connection available for ending call');
@@ -223,7 +207,6 @@ export const CallProvider = ({ children }) => {
         ? callData.receiverId 
         : callData.callerId;
       
-      console.log('Sending CALL_ENDED to:', targetId);
       socket.emit(CALL_ENDED, {
         to: targetId,
         from: user._id,
@@ -340,11 +323,9 @@ export const CallProvider = ({ children }) => {
         return;
       }
 
-      console.log('Creating offer for:', callData.receiverId);
       const offer = await peerConnection.current.createOffer();
       await peerConnection.current.setLocalDescription(offer);
       
-      console.log('Sending WebRTC offer to:', callData.receiverId);
       socket.emit(WEBRTC_OFFER, {
         to: callData.receiverId,
         offer: peerConnection.current.localDescription,
@@ -380,11 +361,9 @@ export const CallProvider = ({ children }) => {
         return;
       }
       
-      console.log('Creating answer for:', callData.callerId);
       const answer = await peerConnection.current.createAnswer();
       await peerConnection.current.setLocalDescription(answer);
       
-      console.log('Sending WebRTC answer to:', callData.callerId);
       socket.emit(WEBRTC_ANSWER, {
         to: callData.callerId,
         answer: peerConnection.current.localDescription,
@@ -405,9 +384,7 @@ export const CallProvider = ({ children }) => {
       }
       
       if (data && data.candidate) {
-        console.log('Adding received ICE candidate');
         await peerConnection.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-        console.log('ICE candidate added successfully');
       } else {
         console.warn('Received invalid ICE candidate data:', data);
       }
@@ -429,11 +406,8 @@ export const CallProvider = ({ children }) => {
         return;
       }
       
-      console.log('Setting remote description from received offer');
       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.offer));
-      console.log('Remote description set successfully');
       
-      console.log('Creating answer after receiving offer');
       await createAnswer();
     } catch (err) {
       console.error('Error handling received offer:', err);
@@ -455,9 +429,7 @@ export const CallProvider = ({ children }) => {
         return;
       }
       
-      console.log('Setting remote description from received answer');
       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
-      console.log('Remote description set successfully from answer');
     } catch (err) {
       console.error('Error handling received answer:', err);
       toast.error('Error connecting to call');
@@ -473,7 +445,6 @@ export const CallProvider = ({ children }) => {
         return;
       }
       
-      console.log('Received ICE candidate from peer');
       handleReceivedIceCandidate(data);
     } catch (err) {
       console.error('Error handling ICE candidate from peer:', err);
@@ -488,13 +459,10 @@ export const CallProvider = ({ children }) => {
     }
     
     const socket = socketRef.current;
-    console.log('Setting up call event listeners on socket:', socket.id);
     
     // Handle incoming call
     const handleCallRequest = (data) => {
       try {
-        console.log('Incoming call request received:', data);
-        
         if (!data || !data.callerId) {
           console.error('Invalid call request data:', data);
           return;
@@ -511,9 +479,6 @@ export const CallProvider = ({ children }) => {
           return;
         }
         
-        console.log(`Setting call status to ringing for ${data.isVideoCall ? 'video' : 'voice'} call from ${data.callerName}`);
-        
-        // Update state for incoming call
         setCallData(data);
         setIsVideoCall(data.isVideoCall);
         setCallStatus('ringing');
@@ -530,8 +495,6 @@ export const CallProvider = ({ children }) => {
     // Handle call accepted
     const handleCallAccepted = (data) => {
       try {
-        console.log('Call accepted:', data);
-        
         // Verify we're the caller
         if (!callData || callData.callerId !== user._id) {
           console.error('Received call accepted but we are not the caller');
@@ -542,7 +505,6 @@ export const CallProvider = ({ children }) => {
           console.error('No peer connection when call accepted');
           // Try to recreate the peer connection if it doesn't exist
           if (localStream) {
-            console.log('Recreating peer connection');
             createPeerConnection(localStream);
           } else {
             console.error('No local stream to recreate peer connection');
@@ -551,11 +513,9 @@ export const CallProvider = ({ children }) => {
           }
         }
         
-        console.log('Setting call status to ongoing');
         setCallStatus('ongoing');
         
         // Create and send offer
-        console.log('Creating WebRTC offer');
         createOffer();
       } catch (err) {
         console.error('Error handling call accepted:', err);
@@ -566,7 +526,6 @@ export const CallProvider = ({ children }) => {
     // Handle call rejected
     const handleCallRejected = (data) => {
       try {
-        console.log('Call rejected:', data);
         toast.error(data?.message || 'Call was rejected');
         cleanupCall();
       } catch (err) {
@@ -578,18 +537,12 @@ export const CallProvider = ({ children }) => {
     // Handle call ended
     const handleCallEnded = (data) => {
       try {
-        console.log('Call ended by remote user, data:', data);
-        
-        // Verify this call end belongs to our current call
         if (callData) {
           const remoteUserId = data?.from;
           const currentCallPeerId = callData.callerId === user._id 
             ? callData.receiverId 
             : callData.callerId;
             
-          console.log('Current call peer:', currentCallPeerId);
-          console.log('Received call end from:', remoteUserId);
-          
           if (remoteUserId && remoteUserId.toString() === currentCallPeerId.toString()) {
             toast.info('Call ended by the other user');
             cleanupCall();
@@ -610,10 +563,6 @@ export const CallProvider = ({ children }) => {
     // Handle WebRTC offer
     const handleOffer = (data) => {
       try {
-        if (!data || !data.offer) {
-          console.error('Invalid offer data:', data);
-          return;
-        }
         handleReceivedOffer(data);
       } catch (err) {
         console.error('Error handling offer:', err);
@@ -624,10 +573,6 @@ export const CallProvider = ({ children }) => {
     // Handle WebRTC answer
     const handleAnswer = async (data) => {
       try {
-        if (!data || !data.answer) {
-          console.error('Invalid answer data:', data);
-          return;
-        }
         handleReceivedAnswer(data);
       } catch (err) {
         console.error('Error handling answer:', err);
@@ -644,16 +589,8 @@ export const CallProvider = ({ children }) => {
     socket.on(WEBRTC_OFFER, handleOffer);
     socket.on(WEBRTC_ANSWER, handleAnswer);
     
-    // Debug check for event listeners
-    const events = [CALL_REQUEST, CALL_ACCEPTED, CALL_REJECTED, CALL_ENDED, ICE_CANDIDATE, WEBRTC_OFFER, WEBRTC_ANSWER];
-    events.forEach(event => {
-      const listenersCount = socket.listeners(event).length;
-      console.log(`Socket event ${event} has ${listenersCount} listeners`);
-    });
-    
     // Clean up
     return () => {
-      console.log('Removing call event listeners');
       socket.off(CALL_REQUEST, handleCallRequest);
       socket.off(CALL_ACCEPTED, handleCallAccepted);
       socket.off(CALL_REJECTED, handleCallRejected);

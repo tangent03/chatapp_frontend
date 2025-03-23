@@ -173,7 +173,6 @@ const Groups = () => {
       setGroupName(groupData.chat.name);
       setGroupNameUpdatedValue(groupData.chat.name);
       setMembers(groupData.chat.members);
-      console.log("Members data:", groupData.chat.members);
       if (groupData.chat.admins) {
         setGroupAdmins(groupData.chat.admins);
       }

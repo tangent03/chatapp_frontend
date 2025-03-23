@@ -1,16 +1,16 @@
 import { useInfiniteScrollTop } from "6pp";
 import {
-  AttachFile as AttachFileIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  Send as SendIcon,
+    AttachFile as AttachFileIcon,
+    Refresh as RefreshIcon,
+    Search as SearchIcon,
+    Send as SendIcon,
 } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState
+    useCallback,
+    useEffect,
+    useRef,
+    useState
 } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,24 +22,24 @@ import { TypingLoader } from "../components/layout/Loaders";
 import MessageComponent from "../components/shared/MessageComponent";
 import { InputBox } from "../components/styles/StyledComponents";
 import {
-  darkBg,
-  darkBorder,
-  darkElevated,
-  darkPaper,
-  darkText,
-  darkTextSecondary,
-  lightBlue,
-  orange
+    darkBg,
+    darkBorder,
+    darkElevated,
+    darkPaper,
+    darkText,
+    darkTextSecondary,
+    lightBlue,
+    orange
 } from "../constants/color";
 import {
-  ALERT,
-  CHAT_JOINED,
-  CHAT_LEAVED,
-  MESSAGE_REACTION,
-  MESSAGE_SEEN,
-  NEW_MESSAGE,
-  START_TYPING,
-  STOP_TYPING,
+    ALERT,
+    CHAT_JOINED,
+    CHAT_LEAVED,
+    MESSAGE_REACTION,
+    MESSAGE_SEEN,
+    NEW_MESSAGE,
+    START_TYPING,
+    STOP_TYPING,
 } from "../constants/events";
 import { useErrors, useSocketEvents } from "../hooks/hook";
 import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
@@ -179,13 +179,11 @@ const Chat = () => {
 
     // Add error event listener
     const handleError = (error) => {
-      console.error("Socket error:", error);
       toast.error(error.message || "Error sending message");
     };
 
     // Force reconnect socket if not connected
     if (!socket.connected) {
-      console.log("Socket not connected, attempting to reconnect");
       socket.connect();
     }
 
@@ -213,11 +211,8 @@ const Chat = () => {
         msg => msg.sender?._id !== user._id && !msg.seen
       );
       
-      console.log("Found unseen messages:", unseenMessages.length);
-      
       // Mark each unseen message as seen
       unseenMessages.forEach(msg => {
-        console.log("Marking message as seen:", msg._id);
         socket.emit(MESSAGE_SEEN, { 
           messageId: msg._id,
           chatId,
@@ -240,12 +235,8 @@ const Chat = () => {
     (data) => {
       if (data.chatId !== chatId) return;
 
-      console.log("Received new message:", data.message);
-
       // Force an immediate state update when we receive a message
       if (data.message.sender?._id !== user._id) {
-        console.log("Received message from another user, immediately updating UI");
-        
         // Don't check for existing messages, just add it to ensure it appears
         setMessages(prev => [...prev, data.message]);
         
@@ -332,8 +323,6 @@ const Chat = () => {
     (data) => {
       if (data.chatId !== chatId) return;
       
-      console.log("Received message reaction event:", data);
-      
       if (!data.messageId || !Array.isArray(data.reactions)) {
         console.error("Invalid reaction data:", data);
         return;
@@ -343,7 +332,6 @@ const Chat = () => {
       setMessages(prev => 
         prev.map(msg => {
           if (msg._id === data.messageId) {
-            console.log("Updating message reactions:", msg._id, data.reactions);
             return { ...msg, reactions: data.reactions || [] };
           }
           return msg;
@@ -354,7 +342,6 @@ const Chat = () => {
       setOldMessages(prev => 
         prev.map(msg => {
           if (msg._id === data.messageId) {
-            console.log("Updating old message reactions:", msg._id, data.reactions);
             return { ...msg, reactions: data.reactions || [] };
           }
           return msg;
@@ -369,13 +356,10 @@ const Chat = () => {
     (data) => {
       if (data.chatId !== chatId) return;
       
-      console.log("Received message seen event:", data);
-      
       // Update messages with seen status using function form
       setMessages(prev => 
         prev.map(msg => {
           if (msg._id === data.messageId) {
-            console.log("Updating message seen status:", msg._id);
             return { ...msg, seen: true };
           }
           return msg;
@@ -386,7 +370,6 @@ const Chat = () => {
       setOldMessages(prev => 
         prev.map(msg => {
           if (msg._id === data.messageId) {
-            console.log("Updating old message seen status:", msg._id);
             return { ...msg, seen: true };
           }
           return msg;

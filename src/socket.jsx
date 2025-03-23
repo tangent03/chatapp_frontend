@@ -11,10 +11,7 @@ let socketInstance = null;
 
 // Initialize or get socket
 export const getSocket = () => {
-  console.log("Getting socket instance");
   if (!socketInstance) {
-    console.log("Creating new socket connection to", SOCKET_ENDPOINT);
-    
     // Create socket connection with improved configuration
     socketInstance = io(SOCKET_ENDPOINT, {
       withCredentials: true,
@@ -28,11 +25,9 @@ export const getSocket = () => {
     
     // Global socket event handlers for debugging
     socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
     });
     
     socketInstance.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
     });
     
     socketInstance.on("connect_error", (err) => {
@@ -53,7 +48,6 @@ export const SocketProvider = ({ children }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   
   const socket = useMemo(() => {
-    console.log("Getting or creating socket in SocketProvider");
     return getSocket();
   }, []);
   
@@ -62,7 +56,6 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     // Listen for online users updates
     socket.on(ONLINE_USERS, (onlineUsers) => {
-      console.log("Received online users:", onlineUsers);
       // Make sure onlineUsers is an array before dispatching
       if (Array.isArray(onlineUsers)) {
         dispatch(setOnlineUsers(onlineUsers));
@@ -77,7 +70,6 @@ export const SocketProvider = ({ children }) => {
   // Add connection status listeners
   useEffect(() => {
     const handleConnect = () => {
-      console.log('Socket connected successfully!', socket.id);
       setSocketConnected(true);
       toast.success("Connected to chat server", {
         id: "socket-connection",
@@ -96,7 +88,6 @@ export const SocketProvider = ({ children }) => {
     };
     
     const handleDisconnect = (reason) => {
-      console.log('Socket disconnected:', reason);
       setSocketConnected(false);
       
       if (reason === 'io server disconnect') {
@@ -112,7 +103,6 @@ export const SocketProvider = ({ children }) => {
     };
     
     const handleReconnect = (attemptNumber) => {
-      console.log('Socket reconnected after', attemptNumber, 'attempts');
       setReconnectAttempt(attemptNumber);
       setSocketConnected(true);
       toast.success("Reconnected to chat server", {
@@ -122,7 +112,6 @@ export const SocketProvider = ({ children }) => {
     };
     
     const handleReconnectAttempt = (attemptNumber) => {
-      console.log('Socket reconnection attempt', attemptNumber);
       setReconnectAttempt(attemptNumber);
     };
     
@@ -146,9 +135,7 @@ export const SocketProvider = ({ children }) => {
     let reconnectTimer;
     
     if (!socketConnected) {
-      console.log("Socket disconnected, setting up reconnect timer");
       reconnectTimer = setTimeout(() => {
-        console.log("Forcing socket reconnection...");
         if (!socket.connected) {
           socket.connect();
         }
