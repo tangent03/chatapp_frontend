@@ -64,7 +64,7 @@ import {
                 />
               ))
             ) : (
-              <Typography textAlign={"center"}>No Friends</Typography>
+              <Typography textAlign={"center"}>No Friends To Show</Typography>
             )}
           </Stack>
   
